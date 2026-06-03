@@ -100,7 +100,16 @@
     color: var(--ink-soft); margin-top: 7px;
   }
   .mw-display b { color: var(--navy); font-size: 15px; }
+  .mw-display span { font-family:'Helvetica Neue',Arial,sans-serif; font-size: 12.5px; color: var(--ink-soft); }
   input[type=range] { width: 100%; margin-top: 10px; accent-color: var(--navy); }
+  .ticks {
+    display: flex; justify-content: space-between; margin-top: 4px; padding: 0 1px;
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 10px;
+    letter-spacing: .04em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600;
+  }
+  .ticks span { flex: 1; text-align: center; }
+  .ticks span:first-child { text-align: left; }
+  .ticks span:last-child { text-align: right; }
 
   /* Results */
   .results { min-width: 0; }
@@ -262,10 +271,13 @@
     <aside class="panel">
       <h2>Project Inputs</h2>
       <div class="field">
-        <label for="mw">IT load (megawatts)</label>
-        <input type="range" id="mw" min="5" max="500" step="5" value="100">
-        <div class="mw-display"><b id="mwval">100</b> MW</div>
-        <div class="hint">The facility&rsquo;s computing power draw. Common deployment units run 30&ndash;300 MW.</div>
+        <label for="mw">Facility scale (IT load)</label>
+        <input type="range" id="mw" min="0" max="3" step="1" value="1">
+        <div class="mw-display"><b id="mwtier">Mid-size / regional</b><br><span id="mwrange">10&ndash;20 MW</span></div>
+        <div class="ticks" aria-hidden="true">
+          <span>Edge</span><span>Mid</span><span>Large</span><span>Hyper</span>
+        </div>
+        <div class="hint">Snaps to four scale tiers. Estimates below are computed at a representative load for the selected tier.</div>
       </div>
       <div class="field">
         <label for="cooling">Cooling technology</label>
@@ -431,6 +443,13 @@
   });
 
   // ---- assumptions ----
+  // Scale tiers: slider index -> representative MW + metadata
+  var TIERS = [
+    { key:"edge",  name:"Edge / small enterprise", range:"1\u20139 MW",    mw:5,   lo:1,   hi:9   },
+    { key:"mid",   name:"Mid-size / regional",      range:"10\u201320 MW",  mw:15,  lo:10,  hi:20  },
+    { key:"large", name:"Large",                    range:"21\u2013100 MW", mw:60,  lo:21,  hi:100 },
+    { key:"hyper", name:"Hyperscaler",              range:"100+ MW",        mw:250, lo:100, hi:400 }
+  ];
   var WUE = { evap:[1.8,1.9], closed:[0.2,0.5], air:[0.0,0.2] };       // L/kWh
   var PUE = { evap:[1.12,1.30], closed:[1.10,1.25], air:[1.20,1.45] }; // facility multiplier
   var COOL_LABEL = { evap:"evaporative", closed:"closed-loop liquid", air:"air-cooled" };
@@ -445,12 +464,15 @@
   function range(arr){ return arr[0] + "\u2013" + arr[1]; }
 
   function compute(){
-    var mw = +document.getElementById('mw').value;
+    var tierIdx = +document.getElementById('mw').value;
+    var tier = TIERS[tierIdx];
+    var mw = tier.mw; // representative MW for the selected tier
     var cool = document.getElementById('cooling').value;
     var muni = document.getElementById('muni').value;
     var type = document.getElementById('type').value;
     var gen = document.getElementById('gen').value;
-    document.getElementById('mwval').textContent = mw;
+    document.getElementById('mwtier').textContent = tier.name;
+    document.getElementById('mwrange').innerHTML = tier.range + " &middot; modeled at ~" + tier.mw + " MW";
 
     // ===== MODULE 1: PERMITS =====
     var permits = [];
@@ -531,10 +553,10 @@
     var gf = document.getElementById('gridflag'), gft = document.getElementById('gridflagtext');
     if (mw >= 70) {
       gf.className = "flag warn";
-      gft.innerHTML = "<b>Transmission-level load.</b> "+mw+" MW exceeds typical distribution capacity and will require transmission interconnection. Whether the local grid can absorb it \u2014 and upgrade cost \u2014 needs a site-specific ISO-NE study, not this screen.";
+      gft.innerHTML = "<b>Transmission-level load.</b> A "+tier.name.toLowerCase()+" facility ("+tier.range+") exceeds typical distribution capacity and will require transmission interconnection. Whether the local grid can absorb it \u2014 and upgrade cost \u2014 needs a site-specific ISO-NE study, not this screen.";
     } else {
       gf.className = "flag info";
-      gft.innerHTML = "<b>Interconnection study required.</b> At "+mw+" MW the connection may be distribution- or transmission-level depending on local capacity. Confirm with the serving utility and ISO-NE queue.";
+      gft.innerHTML = "<b>Interconnection study required.</b> A "+tier.name.toLowerCase()+" facility ("+tier.range+") may connect at distribution or transmission level depending on local capacity. Larger projects in this tier can cross into transmission-level review. Confirm with the serving utility and ISO-NE queue.";
     }
 
     // ===== MODULE 3: ECONOMIC =====
