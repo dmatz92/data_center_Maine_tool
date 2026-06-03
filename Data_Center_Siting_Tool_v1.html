@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Center Siting & Impact Screening Tool</title>
+<style>
+  :root {
+    --ink: #1a2733;
+    --ink-soft: #46586a;
+    --ink-faint: #7a8a99;
+    --line: #d8dee4;
+    --line-soft: #e9edf1;
+    --paper: #f4f1ea;
+    --card: #ffffff;
+    --navy: #1f4e79;
+    --navy-deep: #16385a;
+    --teal: #2b7a78;
+    --amber: #b5651d;
+    --amber-bg: #fbeede;
+    --green: #3a7d44;
+    --green-bg: #e7f1e8;
+    --red: #9e3b3b;
+    --red-bg: #f6e6e6;
+    --shadow: 0 1px 2px rgba(22,56,90,.06), 0 8px 24px rgba(22,56,90,.06);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+    color: var(--ink);
+    background: var(--paper);
+    line-height: 1.55;
+    font-size: 16px;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 22px 80px; }
+
+  /* Header */
+  header.masthead {
+    border-bottom: 2px solid var(--navy);
+    padding: 34px 0 22px;
+    margin-bottom: 30px;
+  }
+  .kicker {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11.5px; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--navy); font-weight: 700; margin-bottom: 10px;
+  }
+  h1 {
+    font-size: 32px; line-height: 1.15; font-weight: 700; color: var(--ink);
+    letter-spacing: -.01em; max-width: 22ch;
+  }
+  .lede {
+    margin-top: 12px; color: var(--ink-soft); font-size: 16.5px; max-width: 64ch;
+  }
+  .disclaimer-top {
+    margin-top: 16px; font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12.5px; color: var(--ink-faint); background: #fff;
+    border: 1px solid var(--line); border-left: 3px solid var(--amber);
+    padding: 10px 14px; border-radius: 4px; max-width: 70ch; line-height: 1.5;
+  }
+
+  /* Layout */
+  .grid { display: grid; grid-template-columns: 300px 1fr; gap: 30px; align-items: start; }
+  @media (max-width: 820px) { .grid { grid-template-columns: 1fr; } }
+
+  /* Inputs panel */
+  .panel {
+    background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+    padding: 22px; box-shadow: var(--shadow); position: sticky; top: 18px;
+  }
+  @media (max-width: 820px) { .panel { position: static; } }
+  .panel h2 {
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--navy);
+    font-weight: 700; margin-bottom: 18px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .field { margin-bottom: 20px; }
+  .field label {
+    display: block; font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 7px;
+  }
+  .field .hint {
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 11.5px;
+    color: var(--ink-faint); margin-top: 5px; line-height: 1.45;
+  }
+  input[type=number], select {
+    width: 100%; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 14px;
+    padding: 9px 11px; border: 1px solid var(--line); border-radius: 5px;
+    background: #fff; color: var(--ink); -webkit-appearance: none; appearance: none;
+  }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237a8a99'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center; padding-right: 30px;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(31,78,121,.12); }
+  .mw-display {
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 13px;
+    color: var(--ink-soft); margin-top: 7px;
+  }
+  .mw-display b { color: var(--navy); font-size: 15px; }
+  input[type=range] { width: 100%; margin-top: 10px; accent-color: var(--navy); }
+
+  /* Results */
+  .results { min-width: 0; }
+  .module {
+    background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+    margin-bottom: 20px; box-shadow: var(--shadow); overflow: hidden;
+  }
+  .module-head {
+    display: flex; align-items: center; gap: 12px; padding: 16px 22px;
+    border-bottom: 1px solid var(--line-soft); background: linear-gradient(to bottom,#fbfcfd,#f6f8fa);
+  }
+  .module-num {
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-weight: 700; font-size: 13px;
+    color: #fff; background: var(--navy); width: 26px; height: 26px; border-radius: 50%;
+    display: grid; place-items: center; flex-shrink: 0;
+  }
+  .module-head h3 { font-size: 18px; font-weight: 700; color: var(--ink); }
+  .module-head .sub {
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 11.5px;
+    color: var(--ink-faint); margin-left: auto; text-align: right; line-height: 1.3;
+    text-transform: uppercase; letter-spacing: .06em; font-weight: 600;
+  }
+  .module-body { padding: 20px 22px; }
+
+  /* permit list */
+  .permit { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line-soft); }
+  .permit:last-child { border-bottom: none; }
+  .permit .dot { width: 9px; height: 9px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+  .dot.req { background: var(--red); }
+  .dot.likely { background: var(--amber); }
+  .dot.maybe { background: var(--ink-faint); }
+  .permit .ptext { flex: 1; }
+  .permit .pname { font-weight: 700; font-size: 15px; }
+  .permit .pagency {
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; color: var(--ink-faint);
+  }
+  .permit .pnote { font-size: 13.5px; color: var(--ink-soft); margin-top: 3px; }
+  .ptag {
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase; padding: 3px 7px; border-radius: 3px;
+    height: fit-content; white-space: nowrap;
+  }
+  .ptag.req { background: var(--red-bg); color: var(--red); }
+  .ptag.likely { background: var(--amber-bg); color: var(--amber); }
+  .ptag.maybe { background: #eef1f4; color: var(--ink-faint); }
+
+  /* metric rows */
+  .metric { padding: 14px 0; border-bottom: 1px solid var(--line-soft); }
+  .metric:last-child { border-bottom: none; }
+  .metric .mlabel {
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .07em; color: var(--ink-faint); margin-bottom: 6px;
+  }
+  .metric .mval { font-size: 22px; font-weight: 700; color: var(--navy-deep); line-height: 1.2; }
+  .metric .mval .unit { font-size: 14px; color: var(--ink-soft); font-weight: 400; }
+  .metric .mrange {
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12.5px; color: var(--ink-soft); margin-top: 4px;
+  }
+  .metric .mnote { font-size: 13px; color: var(--ink-soft); margin-top: 6px; font-style: italic; }
+
+  .flag {
+    display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 6px;
+    margin-top: 12px; font-size: 13.5px; line-height: 1.5;
+  }
+  .flag.warn { background: var(--amber-bg); color: #6e3d10; }
+  .flag.info { background: #eef4f9; color: var(--navy-deep); }
+  .flag svg { flex-shrink: 0; margin-top: 2px; }
+
+  /* econ phase blocks */
+  .phases { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 560px) { .phases { grid-template-columns: 1fr; } }
+  .phase {
+    border: 1px solid var(--line); border-radius: 7px; padding: 15px; background: #fcfdfe;
+  }
+  .phase.construct { border-top: 3px solid var(--teal); }
+  .phase.operate { border-top: 3px solid var(--navy); }
+  .phase .ph-label {
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 4px;
+  }
+  .phase .ph-sub { font-family:'Helvetica Neue',Arial,sans-serif; font-size: 11px; color: var(--ink-faint); margin-bottom: 12px; }
+  .phase .ph-row { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 0; border-bottom: 1px dotted var(--line); }
+  .phase .ph-row:last-child { border-bottom: none; }
+  .phase .ph-k { font-family:'Helvetica Neue',Arial,sans-serif; font-size: 12.5px; color: var(--ink-soft); }
+  .phase .ph-v { font-weight: 700; font-size: 15px; color: var(--navy-deep); }
+  .econ-caveat {
+    margin-top: 14px; padding: 12px 14px; background: var(--red-bg); border-radius: 6px;
+    font-size: 13px; line-height: 1.5; color: #6b2a2a;
+  }
+  .econ-caveat b { color: var(--red); }
+
+  /* expandable sources */
+  details.sources { margin-top: 14px; border-top: 1px solid var(--line-soft); padding-top: 12px; }
+  details.sources summary {
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; font-weight: 600;
+    color: var(--navy); cursor: pointer; letter-spacing: .04em; list-style: none;
+    display: flex; align-items: center; gap: 6px; user-select: none;
+  }
+  details.sources summary::-webkit-details-marker { display: none; }
+  details.sources summary::before {
+    content: "▸"; font-size: 10px; transition: transform .2s; color: var(--ink-faint);
+  }
+  details.sources[open] summary::before { transform: rotate(90deg); }
+  details.sources .src-body {
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; color: var(--ink-soft);
+    line-height: 1.6; margin-top: 10px; padding-left: 16px;
+  }
+  details.sources .src-body p { margin-bottom: 7px; }
+  details.sources .src-body b { color: var(--ink); }
+
+  footer.foot {
+    margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--line);
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px;
+    color: var(--ink-faint); line-height: 1.6;
+  }
+  footer.foot b { color: var(--ink-soft); }
+  .legend { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 8px; font-family:'Helvetica Neue',Arial,sans-serif; font-size: 11.5px; color: var(--ink-soft); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend .dot { width: 9px; height: 9px; border-radius: 50%; }
+  .empty-note { color: var(--ink-faint); font-style: italic; font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <div class="kicker">Data Center Advisory Council &middot; Screening Draft</div>
+    <h1>Data Center Siting &amp; Impact Screening Tool</h1>
+    <p class="lede">A first-pass screen. Enter a project&rsquo;s size, location, and cooling type to see the permits it would likely trigger, its environmental footprint, and its economic and fiscal profile.</p>
+    <div class="disclaimer-top">
+      <b>Screening only.</b> This tool returns statewide rules and industry-standard ranges&mdash;not site-specific determinations. Municipal zoning, actual grid capacity, and water-system headroom must be confirmed locally for any real project. Figures reflect public industry and government sources current as of mid-2026.
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- INPUTS -->
+    <aside class="panel">
+      <h2>Project Inputs</h2>
+      <div class="field">
+        <label for="mw">IT load (megawatts)</label>
+        <input type="range" id="mw" min="5" max="500" step="5" value="100">
+        <div class="mw-display"><b id="mwval">100</b> MW</div>
+        <div class="hint">The facility&rsquo;s computing power draw. Common deployment units run 30&ndash;300 MW.</div>
+      </div>
+      <div class="field">
+        <label for="cooling">Cooling technology</label>
+        <select id="cooling">
+          <option value="evap">Evaporative (water-intensive)</option>
+          <option value="closed">Closed-loop liquid (balanced)</option>
+          <option value="air">Air-cooled / free-air (energy-intensive)</option>
+        </select>
+        <div class="hint">The single biggest driver of the water-vs-energy trade-off.</div>
+      </div>
+      <div class="field">
+        <label for="muni">Municipality</label>
+        <select id="muni">
+          <option value="">Select a municipality&hellip;</option>
+        </select>
+        <div class="hint">Sets the local-review flag. v1 does not yet hold town-specific zoning or grid data&mdash;treated as &ldquo;confirm locally.&rdquo;</div>
+      </div>
+      <div class="field">
+        <label for="type">Facility type</label>
+        <select id="type">
+          <option value="standard">Standard / cloud</option>
+          <option value="ai">AI-ready / high-density</option>
+        </select>
+        <div class="hint">Drives the capital-cost-per-MW assumption.</div>
+      </div>
+      <div class="field">
+        <label for="gen">Backup generation on site?</label>
+        <select id="gen">
+          <option value="yes">Yes (typical for data centers)</option>
+          <option value="no">No</option>
+        </select>
+        <div class="hint">Diesel generators are the main air-permit trigger.</div>
+      </div>
+    </aside>
+
+    <!-- RESULTS -->
+    <main class="results">
+      <!-- MODULE 1 -->
+      <section class="module">
+        <div class="module-head">
+          <div class="module-num">1</div>
+          <h3>Permitting</h3>
+          <div class="sub">Rules engine<br>near-deterministic</div>
+        </div>
+        <div class="module-body">
+          <div class="legend">
+            <span><span class="dot req"></span> Required</span>
+            <span><span class="dot likely"></span> Likely / engineered</span>
+            <span><span class="dot maybe"></span> Confirm locally</span>
+          </div>
+          <div id="permits"></div>
+          <details class="sources">
+            <summary>Assumptions &amp; sources</summary>
+            <div class="src-body">
+              <p><b>Site Law (SLODA):</b> The controlling trigger for a data center is the &ldquo;structure&rdquo; threshold&mdash;buildings, parking, and paved/graded area over <b>3 acres</b> (Title 38 M.R.S. &sect;482). Projects of 3&ndash;10 acres may be delegated to a municipality registered with DEP. The 20-acre figure is the separate general land-area trigger.</p>
+              <p><b>Air:</b> Maine licenses minor sources under Chapter 115 and major (Title V) sources under Chapter 140. Backup generators are typically engineered with fuel/hour caps to stay &ldquo;synthetic minor&rdquo; below Clean Air Act major-source thresholds (100/250 tpy)&mdash;as in the Nordic Aquafarms application.</p>
+              <p><b>Water &amp; discharge:</b> MEPDES wastewater license (DEP, delegated NPDES) applies to any discharge to waters of the State; evaporative blowdown is the usual trigger. Withdrawal review depends on source and volume.</p>
+              <p><b>NRPA / &sect;404:</b> Any wetland, stream, great-pond, or shoreland disturbance triggers Natural Resources Protection Act review (DEP) plus federal Section 404 (US Army Corps).</p>
+              <p><b>Grid:</b> Interconnection study with ISO-NE and the serving utility; large loads increasingly face dedicated study (FERC ANOPR, Oct 2025).</p>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <!-- MODULE 2 -->
+      <section class="module">
+        <div class="module-head">
+          <div class="module-num">2</div>
+          <h3>Environmental Footprint</h3>
+          <div class="sub">Screening estimate<br>ranges, not points</div>
+        </div>
+        <div class="module-body">
+          <div class="metric">
+            <div class="mlabel">Direct water use</div>
+            <div class="mval" id="waterval">&mdash;</div>
+            <div class="mrange" id="waterrange"></div>
+            <div class="mnote" id="waternote"></div>
+          </div>
+          <div class="metric">
+            <div class="mlabel">Annual electricity draw (total facility)</div>
+            <div class="mval" id="gridval">&mdash;</div>
+            <div class="mrange" id="gridrange"></div>
+          </div>
+          <div class="metric" style="border-bottom:none;">
+            <div class="mlabel">Process discharge</div>
+            <div class="mval" id="dischargeval" style="font-size:17px;">&mdash;</div>
+            <div class="mnote" id="dischargenote"></div>
+          </div>
+          <div class="flag info" id="gridflag">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 3a1 1 0 110 2 1 1 0 010-2zm1 8H7v-5h2v5z"/></svg>
+            <span id="gridflagtext"></span>
+          </div>
+          <details class="sources">
+            <summary>Assumptions &amp; sources</summary>
+            <div class="src-body">
+              <p><b>Water (WUE):</b> Liters of water per kWh of IT energy. Archetype ranges: air-cooled ~0.0&ndash;0.2; closed-loop ~0.2&ndash;0.5; evaporative ~1.8&ndash;1.9 (U.S. average, Lawrence Berkeley 2016). At ~1.8 L/kWh a 100 MW facility has been estimated near 1.1M gallons/day.</p>
+              <p><b>Energy (PUE):</b> Total facility energy = IT energy &times; PUE. Efficient designs ~1.1; air-cooled higher. Annual energy = MW &times; 8,760 hours.</p>
+              <p><b>Trade-off:</b> Lower-water cooling means higher energy use&mdash;the water and grid figures move in opposite directions by design.</p>
+              <p><b>Grid:</b> Magnitude flag only. Whether a specific substation can host the load, and upgrade cost, require a site-specific interconnection study. Historically a large majority of interconnection-queue entrants withdraw before connecting (Lawrence Berkeley).</p>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <!-- MODULE 3 -->
+      <section class="module">
+        <div class="module-head">
+          <div class="module-num">3</div>
+          <h3>Economic &amp; Fiscal Impact</h3>
+          <div class="sub">Multiplier model<br>widest error bars</div>
+        </div>
+        <div class="module-body">
+          <div class="metric" style="padding-top:0;">
+            <div class="mlabel">Estimated capital investment (construction &amp; infrastructure)</div>
+            <div class="mval" id="capval">&mdash;</div>
+            <div class="mrange" id="caprange"></div>
+          </div>
+          <div class="phases" style="margin-top:16px;">
+            <div class="phase construct">
+              <div class="ph-label">Construction phase</div>
+              <div class="ph-sub">One-time &middot; ~18&ndash;24 months</div>
+              <div class="ph-row"><span class="ph-k">Employment</span><span class="ph-v" id="cjobs">&mdash;</span></div>
+              <div class="ph-row"><span class="ph-k">One-time tax revenue</span><span class="ph-v" id="ctax">&mdash;</span></div>
+            </div>
+            <div class="phase operate">
+              <div class="ph-label">Operating phase</div>
+              <div class="ph-sub">Permanent &middot; recurring annually</div>
+              <div class="ph-row"><span class="ph-k">Direct on-site FTEs</span><span class="ph-v" id="ojobs">&mdash;</span></div>
+              <div class="ph-row"><span class="ph-k">Total w/ multiplier</span><span class="ph-v" id="ojobstot">&mdash;</span></div>
+            </div>
+          </div>
+          <div class="econ-caveat">
+            <b>Read these separately.</b> Construction jobs are large but temporary (reported as job-years, not permanent positions). Permanent employment is modest&mdash;independent research finds data-center incentives have limited measurable effect on local employment. The decision-relevant figure is net fiscal: recurring public revenue minus any incentives granted.
+          </div>
+          <details class="sources">
+            <summary>Assumptions &amp; sources</summary>
+            <div class="src-body">
+              <p><b>Capital cost:</b> Standard/cloud ~$9&ndash;12M per MW; AI-ready ~$20M per MW (2025&ndash;26 industry benchmarks). Shown figure is the construction-and-infrastructure portion, separate from imported IT/server cost.</p>
+              <p><b>Construction jobs:</b> Illustrative multiplier on construction spend, expressed as <b>job-years</b> over the build. Replace with Maine-calibrated IMPLAN or REMI multipliers before relying on these.</p>
+              <p><b>Operating jobs:</b> Direct FTEs scale modestly with MW (data centers are not labor-intensive to run); total applies an indirect/induced multiplier. Placeholder multipliers pending model selection.</p>
+              <p><b>Model choice pending:</b> IMPLAN (accessible, data-center sector detail) vs. REMI (dynamic multi-decade fiscal). Worked templates: Maryland (IMPLAN), New York/Micron (REMI, reported ~2.0 fiscal benefit-cost ratio).</p>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <footer class="foot">
+        <p><b>v1 scope.</b> A transparent calculator that encodes statewide rules and industry-standard ranges. It does not yet hold per-municipality zoning, substation capacity, or treatment-plant data&mdash;those produce &ldquo;confirm locally&rdquo; flags. Economic multipliers are placeholders pending IMPLAN/REMI selection and Maine calibration.</p>
+        <p style="margin-top:8px;"><b>Not legal, engineering, or financial advice.</b> For discussion by the council; verify against primary Maine statutes and rules before use on any individual project.</p>
+      </footer>
+    </main>
+  </div>
+</div>
+
+<script>
+  // ---- Maine municipalities (sample for the location dropdown) ----
+  var MUNIS = ["Augusta","Bangor","Biddeford","Brewer","Brunswick","Lewiston","Portland",
+    "Presque Isle","Sanford","Saco","Scarborough","South Portland","Waterville","Westbrook",
+    "Auburn","Caribou","Ellsworth","Gardiner","Hallowell","Old Town","Rockland","Bath"];
+  var muniSel = document.getElementById('muni');
+  MUNIS.sort().forEach(function(m){
+    var o = document.createElement('option'); o.value = m; o.textContent = m; muniSel.appendChild(o);
+  });
+
+  // ---- assumptions ----
+  var WUE = { evap:[1.8,1.9], closed:[0.2,0.5], air:[0.0,0.2] };       // L/kWh
+  var PUE = { evap:[1.12,1.30], closed:[1.10,1.25], air:[1.20,1.45] }; // facility multiplier
+  var COOL_LABEL = { evap:"evaporative", closed:"closed-loop liquid", air:"air-cooled" };
+  var CAP = { standard:[9,12], ai:[18,22] }; // $M per MW (construction+infra)
+  var L_PER_GAL = 3.78541;
+
+  function fmt(n){ return n.toLocaleString('en-US'); }
+  function money(m){ // m in $millions
+    if (m >= 1000) return "$" + (m/1000).toFixed(m/1000>=10?1:2) + "B";
+    return "$" + Math.round(m) + "M";
+  }
+  function range(arr){ return arr[0] + "\u2013" + arr[1]; }
+
+  function compute(){
+    var mw = +document.getElementById('mw').value;
+    var cool = document.getElementById('cooling').value;
+    var muni = document.getElementById('muni').value;
+    var type = document.getElementById('type').value;
+    var gen = document.getElementById('gen').value;
+    document.getElementById('mwval').textContent = mw;
+
+    // ===== MODULE 1: PERMITS =====
+    var permits = [];
+    // Site Law - a data center footprint always exceeds 3-acre structure threshold
+    permits.push({name:"Site Location of Development Act (Site Law)", agency:"Maine DEP \u2014 Land", tag:"req",
+      note:"A data center footprint exceeds the 3-acre structure threshold. Stormwater, groundwater, wildlife, and noise standards are reviewed here."});
+    // Stormwater is folded in but list as required
+    permits.push({name:"Stormwater management / MEPDES", agency:"Maine DEP", tag:"req",
+      note:"Large impervious area; typically reviewed within the Site Law application."});
+    // Air - depends on generators
+    if (gen === "yes") {
+      permits.push({name:"Air emission license (minor source, Ch. 115)", agency:"Maine DEP \u2014 Air", tag:"likely",
+        note:"Backup generators usually engineered with fuel/hour caps to stay below major-source (Title V) thresholds."});
+    }
+    // Water use
+    if (cool === "evap" || cool === "closed") {
+      permits.push({name:"MEPDES wastewater discharge license", agency:"Maine DEP", tag: cool==="evap"?"likely":"maybe",
+        note: cool==="evap" ? "Evaporative blowdown is a process discharge requiring coverage; assess municipal treatment capacity." : "Closed-loop systems produce little discharge; confirm whether any process water leaves the site."});
+    }
+    if (mw >= 100) {
+      permits.push({name:"Water withdrawal review", agency:"Maine DEP / local", tag:"likely",
+        note:"At this load, cooling and make-up water demand may trigger withdrawal review depending on source."});
+    } else {
+      permits.push({name:"Water withdrawal review", agency:"Maine DEP / local", tag:"maybe",
+        note:"Depends on water source and daily volume; confirm against current DEP thresholds."});
+    }
+    // NRPA - always a maybe (site dependent)
+    permits.push({name:"Natural Resources Protection Act + federal \u00A7404", agency:"Maine DEP + US Army Corps", tag:"maybe",
+      note:"Triggered only if the site disturbs wetlands, streams, great ponds, or shoreland. Confirm with a site survey."});
+    // Grid
+    permits.push({name:"Grid interconnection study & agreement", agency:"ISO-NE + serving utility", tag: mw>=70?"req":"likely",
+      note: mw>=70 ? "Transmission-level load; expect a dedicated interconnection study with potentially long timelines." : "Distribution- or transmission-level depending on local capacity; study required."});
+    // Local
+    permits.push({name:"Local zoning, conditional use & site plan", agency: muni ? muni : "Municipality", tag:"maybe",
+      note: muni ? ("Confirm " + muni + "\u2019s ordinance \u2014 v1 does not hold town-specific zoning data.") : "Select a municipality; v1 flags this for local confirmation."});
+
+    var ph = "";
+    permits.forEach(function(p){
+      ph += '<div class="permit"><div class="dot '+p.tag+'"></div><div class="ptext">'+
+        '<div class="pname">'+p.name+'</div>'+
+        '<div class="pagency">'+p.agency+'</div>'+
+        '<div class="pnote">'+p.note+'</div></div>'+
+        '<div class="ptag '+p.tag+'">'+(p.tag==="req"?"Required":p.tag==="likely"?"Likely":"Confirm")+'</div></div>';
+    });
+    document.getElementById('permits').innerHTML = ph;
+
+    // ===== MODULE 2: ENVIRONMENTAL =====
+    var itKwhYr = mw * 8760 * 1000; // kWh/yr IT
+    var wlo = itKwhYr * WUE[cool][0] / L_PER_GAL; // gallons/yr
+    var whi = itKwhYr * WUE[cool][1] / L_PER_GAL;
+    var wDayLo = wlo/365, wDayHi = whi/365;
+    var wv = document.getElementById('waterval');
+    if (cool === "air") {
+      wv.innerHTML = "Near-zero <span class='unit'>direct water</span>";
+      document.getElementById('waterrange').textContent = "~0\u2013" + fmt(Math.round(wDayHi)) + " gallons/day (mostly indirect, via power generation)";
+    } else {
+      wv.innerHTML = fmt(Math.round(wDayLo)) + "\u2013" + fmt(Math.round(wDayHi)) + " <span class='unit'>gallons/day</span>";
+      document.getElementById('waterrange').textContent = "\u2248 " + fmt(Math.round(wlo/1e6*10)/10) + "\u2013" + fmt(Math.round(whi/1e6*10)/10) + " million gallons/year  \u00B7  WUE " + range(WUE[cool]) + " L/kWh";
+    }
+    document.getElementById('waternote').textContent = "Based on " + COOL_LABEL[cool] + " cooling. " +
+      (cool==="air" ? "Air cooling trades water for higher electricity use \u2014 see grid figure." :
+       cool==="evap" ? "Evaporative cooling minimizes energy but is water-intensive." :
+       "Closed-loop balances moderate water and energy use.");
+
+    // grid
+    var fLo = mw * PUE[cool][0], fHi = mw * PUE[cool][1];
+    var eLo = fLo*8760/1000, eHi = fHi*8760/1000; // GWh/yr
+    document.getElementById('gridval').innerHTML = fmt(Math.round(eLo)) + "\u2013" + fmt(Math.round(eHi)) + " <span class='unit'>GWh/year</span>";
+    document.getElementById('gridrange').textContent = "Facility draw \u2248 " + fLo.toFixed(0) + "\u2013" + fHi.toFixed(0) + " MW (IT load " + mw + " MW \u00D7 PUE " + range(PUE[cool]) + ")";
+
+    // discharge
+    var dv = document.getElementById('dischargeval'), dn = document.getElementById('dischargenote');
+    if (cool === "evap") { dv.textContent = "Significant \u2014 cooling blowdown"; dn.textContent = "Concentrated minerals require periodic discharge under MEPDES; may stress municipal treatment."; }
+    else if (cool === "closed") { dv.textContent = "Minimal"; dn.textContent = "Closed-loop systems recirculate; little routine process discharge."; }
+    else { dv.textContent = "Negligible"; dn.textContent = "Air cooling produces essentially no process wastewater."; }
+
+    // grid flag
+    var gf = document.getElementById('gridflag'), gft = document.getElementById('gridflagtext');
+    if (mw >= 70) {
+      gf.className = "flag warn";
+      gft.innerHTML = "<b>Transmission-level load.</b> "+mw+" MW exceeds typical distribution capacity and will require transmission interconnection. Whether the local grid can absorb it \u2014 and upgrade cost \u2014 needs a site-specific ISO-NE study, not this screen.";
+    } else {
+      gf.className = "flag info";
+      gft.innerHTML = "<b>Interconnection study required.</b> At "+mw+" MW the connection may be distribution- or transmission-level depending on local capacity. Confirm with the serving utility and ISO-NE queue.";
+    }
+
+    // ===== MODULE 3: ECONOMIC =====
+    var capLo = mw * CAP[type][0], capHi = mw * CAP[type][1]; // $M
+    document.getElementById('capval').textContent = money(capLo) + "\u2013" + money(capHi);
+    document.getElementById('caprange').textContent = "At $" + range(CAP[type]) + "M per MW (" + (type==="ai"?"AI-ready / high-density":"standard / cloud") + ") \u00B7 excludes imported IT/server cost";
+
+    var capMid = (capLo+capHi)/2;
+    // illustrative construction job-years: ~3.5 job-years per $1M construction spend
+    var cjobsLo = Math.round(capLo*3.0/10)*10, cjobsHi = Math.round(capHi*4.0/10)*10;
+    document.getElementById('cjobs').textContent = fmt(cjobsLo) + "\u2013" + fmt(cjobsHi) + " job-yrs";
+    // one-time tax: rough 1.5-2.5% of construction spend
+    document.getElementById('ctax').textContent = money(capLo*0.015) + "\u2013" + money(capHi*0.025);
+    // operating FTEs: modest, scales sublinearly with MW
+    var oLo = Math.max(15, Math.round(mw*0.25/5)*5), oHi = Math.max(25, Math.round(mw*0.5/5)*5);
+    document.getElementById('ojobs').textContent = oLo + "\u2013" + oHi + " FTEs";
+    var multLo = Math.round(oLo*2.0), multHi = Math.round(oHi*3.0);
+    document.getElementById('ojobstot').textContent = "~" + multLo + "\u2013" + multHi + " jobs";
+  }
+
+  ['mw','cooling','muni','type','gen'].forEach(function(id){
+    document.getElementById(id).addEventListener('input', compute);
+  });
+  compute();
+</script>
+</body>
+</html>
