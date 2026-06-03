@@ -221,9 +221,32 @@
   .legend span { display: inline-flex; align-items: center; gap: 6px; }
   .legend .dot { width: 9px; height: 9px; border-radius: 50%; }
   .empty-note { color: var(--ink-faint); font-style: italic; font-size: 14px; }
+
+  /* Illustrative watermark */
+  .watermark {
+    position: fixed; inset: 0; z-index: 9999; pointer-events: none; overflow: hidden;
+    background-image: repeating-linear-gradient(
+      -28deg,
+      transparent 0, transparent 0
+    );
+  }
+  .watermark::before {
+    content: "Illustrative  \00B7  Illustrative  \00B7  Illustrative  \00B7  Illustrative  \00B7  Illustrative  \00B7  Illustrative  \00B7  Illustrative  \00B7  Illustrative  \00B7  Illustrative  \00B7  Illustrative  \00B7  Illustrative  \00B7  Illustrative  \00B7  Illustrative  \00B7  Illustrative  \00B7  Illustrative  \00B7  Illustrative  \00B7  Illustrative  \00B7  Illustrative  \00B7  Illustrative  \00B7  Illustrative  \00B7  Illustrative  \00B7  Illustrative  \00B7  Illustrative";
+    position: absolute; top: -30%; left: -30%; width: 160%; height: 160%;
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 4vh 3vw; align-content: center;
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-weight: 800;
+    font-size: 5vw; line-height: 2.6; letter-spacing: .1em; text-transform: uppercase;
+    color: rgba(31,78,121,.06); transform: rotate(-28deg); text-align: center;
+    word-spacing: .3em;
+  }
+  @media print {
+    .watermark::before { color: rgba(31,78,121,.09); }
+  }
 </style>
 </head>
 <body>
+<div class="watermark" aria-hidden="true"></div>
 <div class="wrap">
   <header class="masthead">
     <div class="kicker">Data Center Advisory Council &middot; Screening Draft</div>
