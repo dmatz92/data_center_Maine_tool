@@ -201,6 +201,21 @@
   }
   .econ-caveat b { color: var(--red); }
 
+  .netfiscal {
+    margin-top: 14px; padding: 14px 16px; background: var(--green-bg); border-radius: 6px;
+    border: 1px solid #cfe3d2;
+  }
+  .nf-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .nf-label {
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .06em; color: #2c5d34;
+  }
+  .nf-val { font-size: 20px; font-weight: 700; color: #2c5d34; line-height: 1.1; text-align: right; }
+  .nf-note {
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; color: #3f6b46;
+    margin-top: 6px; line-height: 1.5;
+  }
+
   /* expandable sources */
   details.sources { margin-top: 14px; border-top: 1px solid var(--line-soft); padding-top: 12px; }
   details.sources summary {
@@ -311,6 +326,14 @@
         </select>
         <div class="hint">Diesel generators are the main air-permit trigger.</div>
       </div>
+      <div class="field">
+        <label for="exempt">Equipment tax exemption (BETE-style)?</label>
+        <select id="exempt">
+          <option value="yes">Yes &mdash; equipment exempt (typical incentive)</option>
+          <option value="no">No &mdash; fully taxable</option>
+        </select>
+        <div class="hint">Maine&rsquo;s Business Equipment Tax Exemption exempts most business equipment from property tax, and eligible equipment from sales tax. Toggling shows how much public revenue the exemption forgoes.</div>
+      </div>
     </aside>
 
     <!-- RESULTS -->
@@ -400,25 +423,34 @@
               <div class="ph-label">Construction phase</div>
               <div class="ph-sub">One-time &middot; ~18&ndash;24 months</div>
               <div class="ph-row"><span class="ph-k">Employment</span><span class="ph-v" id="cjobs">&mdash;</span></div>
-              <div class="ph-row"><span class="ph-k">One-time tax revenue</span><span class="ph-v" id="ctax">&mdash;</span></div>
+              <div class="ph-row"><span class="ph-k">One-time sales/use tax</span><span class="ph-v" id="ctax">&mdash;</span></div>
             </div>
             <div class="phase operate">
               <div class="ph-label">Operating phase</div>
               <div class="ph-sub">Permanent &middot; recurring annually</div>
               <div class="ph-row"><span class="ph-k">Direct on-site FTEs</span><span class="ph-v" id="ojobs">&mdash;</span></div>
               <div class="ph-row"><span class="ph-k">Total w/ multiplier</span><span class="ph-v" id="ojobstot">&mdash;</span></div>
+              <div class="ph-row"><span class="ph-k">Annual property tax</span><span class="ph-v" id="proptax">&mdash;</span></div>
             </div>
           </div>
+          <div class="netfiscal" id="netfiscal">
+            <div class="nf-row">
+              <span class="nf-label">Recurring annual public revenue</span>
+              <span class="nf-val" id="nfannual">&mdash;</span>
+            </div>
+            <div class="nf-note" id="nfnote"></div>
+          </div>
           <div class="econ-caveat">
-            <b>Read these separately.</b> Construction jobs are large but temporary (reported as job-years, not permanent positions). Permanent employment is modest&mdash;independent research finds data-center incentives have limited measurable effect on local employment. The decision-relevant figure is net fiscal: recurring public revenue minus any incentives granted.
+            <b>Read these separately.</b> Construction jobs and one-time sales/use tax are temporary&mdash;they stop once the build ends. The recurring figure (chiefly annual property tax) is the decision-relevant one for whether a project pays off over time, and it is precisely what incentives like Maine&rsquo;s Business Equipment Tax Exemption (BETE) can erase. Permanent employment is modest; independent research finds data-center incentives have limited measurable effect on local jobs.
           </div>
           <details class="sources">
             <summary>Assumptions &amp; sources</summary>
             <div class="src-body">
               <p><b>Capital cost:</b> Standard/cloud ~$9&ndash;12M per MW; AI-ready ~$20M per MW (2025&ndash;26 industry benchmarks). Shown figure is the construction-and-infrastructure portion, separate from imported IT/server cost.</p>
-              <p><b>Construction jobs:</b> Illustrative multiplier on construction spend, expressed as <b>job-years</b> over the build. Replace with Maine-calibrated IMPLAN or REMI multipliers before relying on these.</p>
-              <p><b>Operating jobs:</b> Direct FTEs scale modestly with MW (data centers are not labor-intensive to run); total applies an indirect/induced multiplier. Placeholder multipliers pending model selection.</p>
-              <p><b>Model choice pending:</b> IMPLAN (accessible, data-center sector detail) vs. REMI (dynamic multi-decade fiscal). Worked templates: Maryland (IMPLAN), New York/Micron (REMI, reported ~2.0 fiscal benefit-cost ratio).</p>
+              <p><b>One-time sales/use tax:</b> Maine&rsquo;s general sales/use rate is 5.5% statewide (no local sales tax). Applied here to the taxable-materials share of construction spend (assumed ~40%; labor is not taxed). <b>If the equipment exemption applies</b>, most machinery/equipment purchases are sales-tax exempt, sharply reducing this figure.</p>
+              <p><b>Annual property tax:</b> Estimated as assessed value &times; mill rate. Assessment ratio assumed ~70% of capital value; mill rate range ~12&ndash;20 per $1,000 (rural to urban Maine). <b>Maine&rsquo;s Business Equipment Tax Exemption (BETE)</b> exempts most business equipment from property tax&mdash;and a data center&rsquo;s value is overwhelmingly equipment&mdash;so the exemption toggle dramatically changes this line.</p>
+              <p><b>Why the toggle matters:</b> Because a data center&rsquo;s assessed value is mostly equipment, BETE-style exemptions can move recurring property-tax revenue close to zero. This is the central fiscal trade-off the council should weigh; the toggle lets you see both ends.</p>
+              <p><b>Net-fiscal &amp; jobs:</b> Multipliers are placeholders pending IMPLAN/REMI selection and Maine calibration. Worked templates: Maryland (IMPLAN), New York/Micron (REMI, reported ~2.0 fiscal benefit-cost ratio).</p>
             </div>
           </details>
         </div>
@@ -459,7 +491,11 @@
   function fmt(n){ return n.toLocaleString('en-US'); }
   function money(m){ // m in $millions
     if (m >= 1000) return "$" + (m/1000).toFixed(m/1000>=10?1:2) + "B";
-    return "$" + Math.round(m) + "M";
+    if (m >= 10) return "$" + Math.round(m) + "M";
+    if (m >= 1) return "$" + m.toFixed(1) + "M";
+    if (m >= 0.1) return "$" + Math.round(m*1000) + "K";
+    if (m > 0) return "<$100K";
+    return "$0";
   }
   function range(arr){ return arr[0] + "\u2013" + arr[1]; }
 
@@ -565,19 +601,53 @@
     document.getElementById('caprange').textContent = "At $" + range(CAP[type]) + "M per MW (" + (type==="ai"?"AI-ready / high-density":"standard / cloud") + ") \u00B7 excludes imported IT/server cost";
 
     var capMid = (capLo+capHi)/2;
-    // illustrative construction job-years: ~3.5 job-years per $1M construction spend
+    // illustrative construction job-years: ~3-4 job-years per $1M construction spend
     var cjobsLo = Math.round(capLo*3.0/10)*10, cjobsHi = Math.round(capHi*4.0/10)*10;
     document.getElementById('cjobs').textContent = fmt(cjobsLo) + "\u2013" + fmt(cjobsHi) + " job-yrs";
-    // one-time tax: rough 1.5-2.5% of construction spend
-    document.getElementById('ctax').textContent = money(capLo*0.015) + "\u2013" + money(capHi*0.025);
+
+    // --- TAX LOGIC ---
+    var exempt = document.getElementById('exempt').value === "yes";
+    // One-time sales/use tax: 5.5% Maine rate on taxable-materials share of construction.
+    // ~40% of construction spend is taxable materials (labor untaxed). Exemption strips most equipment.
+    var SUT = 0.055, taxableShare = exempt ? 0.12 : 0.40;
+    var sutLo = capLo * taxableShare * SUT, sutHi = capHi * taxableShare * SUT; // $M
+    document.getElementById('ctax').textContent = money(sutLo) + "\u2013" + money(sutHi);
+
+    // Annual property tax: assessed value (~70% of capital) x mill rate (12-20 per $1,000).
+    // BETE exempts most business equipment; a data center's value is mostly equipment, so
+    // exemption leaves only a small building/land base taxable.
+    var assessRatio = 0.70;
+    var millLo = 0.012, millHi = 0.020;
+    var taxableValueShare = exempt ? 0.12 : 1.0; // most value is equipment -> exempt
+    var ptLo = capLo * assessRatio * taxableValueShare * millLo; // $M/yr
+    var ptHi = capHi * assessRatio * taxableValueShare * millHi;
+    document.getElementById('proptax').textContent = money(ptLo) + "\u2013" + money(ptHi) + "/yr";
+
     // operating FTEs: modest, scales sublinearly with MW
     var oLo = Math.max(15, Math.round(mw*0.25/5)*5), oHi = Math.max(25, Math.round(mw*0.5/5)*5);
     document.getElementById('ojobs').textContent = oLo + "\u2013" + oHi + " FTEs";
     var multLo = Math.round(oLo*2.0), multHi = Math.round(oHi*3.0);
     document.getElementById('ojobstot').textContent = "~" + multLo + "\u2013" + multHi + " jobs";
+
+    // Net-fiscal: recurring annual public revenue (property tax is the dominant recurring line)
+    document.getElementById('nfannual').textContent = money(ptLo) + "\u2013" + money(ptHi) + " / year";
+    var nf = document.getElementById('netfiscal'), nfn = document.getElementById('nfnote');
+    if (exempt) {
+      nf.style.background = "#f6e6e6"; nf.style.borderColor = "#e3c9c9";
+      document.querySelector('.nf-label').style.color = "#7a2e2e";
+      document.getElementById('nfannual').style.color = "#7a2e2e";
+      nfn.style.color = "#7a3535";
+      nfn.innerHTML = "<b>With the equipment exemption applied,</b> most of the facility&rsquo;s assessed value is exempt, so recurring property-tax revenue is sharply reduced. The forgone revenue is the cost of the incentive \u2014 weigh it against the jobs and one-time activity above. Toggle the exemption off to see the full taxable figure.";
+    } else {
+      nf.style.background = "#e7f1e8"; nf.style.borderColor = "#cfe3d2";
+      document.querySelector('.nf-label').style.color = "#2c5d34";
+      document.getElementById('nfannual').style.color = "#2c5d34";
+      nfn.style.color = "#3f6b46";
+      nfn.innerHTML = "Full taxable scenario (no equipment exemption). This recurring property-tax revenue is the figure most relevant to whether the project pays off over time. Toggle the exemption on to see how much an incentive would forgo.";
+    }
   }
 
-  ['mw','cooling','muni','type','gen'].forEach(function(id){
+  ['mw','cooling','muni','type','gen','exempt'].forEach(function(id){
     document.getElementById(id).addEventListener('input', compute);
   });
   compute();
