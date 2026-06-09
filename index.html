@@ -269,7 +269,7 @@
           <option value="closed">Closed-loop &mdash; balanced</option>
           <option value="air">Air-cooled &mdash; uses more power, little water</option>
         </select>
-        <div class="mh">The biggest lever on the water-vs-power tradeoff.</div>
+        <div class="mh">The biggest factor in the water-vs-power balance.</div>
       </div>
       <div class="mini-field">
         <label for="muni">Which community?</label>
@@ -290,24 +290,24 @@
           <option value="yes">Yes &mdash; equipment exempted</option>
           <option value="no">No &mdash; fully taxed</option>
         </select>
-        <div class="mh">Maine's equipment exemption (BETE) can erase most ongoing tax revenue.</div>
+        <div class="mh">Maine's equipment exemption (BETE) can reduce most ongoing tax revenue.</div>
       </div>
     </div>
   </section>
 
   <!-- BALANCE -->
   <div class="balance-intro">
-    <h2 class="display">The tradeoff at this size</h2>
-    <p>Both sides grow as the facility gets bigger&mdash;but not at the same rate. Watch the strength bars: burdens tend to climb faster than lasting benefits.</p>
+    <h2 class="display">At this size</h2>
+    <p>The bars next to each item show how steeply it changes as the facility gets bigger. Items scale differently&mdash;some rise in step with size, others change very little.</p>
   </div>
 
   <div class="balance">
     <!-- BURDENS -->
     <div class="pan burdens">
       <div class="pan-head">
-        <div class="tag">What it takes</div>
-        <h3 class="display">Burdens on the community</h3>
-        <div class="ph-sub">Strain on shared resources</div>
+        <div class="tag">What it uses</div>
+        <h3 class="display">Demands on the community</h3>
+        <div class="ph-sub">Shared resources and infrastructure</div>
       </div>
 
       <div class="item">
@@ -356,9 +356,9 @@
     <!-- BENEFITS -->
     <div class="pan benefits">
       <div class="pan-head">
-        <div class="tag">What it brings</div>
-        <h3 class="display">Benefits to the community</h3>
-        <div class="ph-sub">Economic return</div>
+        <div class="tag">What it provides</div>
+        <h3 class="display">Returns to the community</h3>
+        <div class="ph-sub">Economic activity</div>
       </div>
 
       <div class="item">
@@ -418,7 +418,7 @@
   </section>
 
   <footer class="foot">
-    <p><b>How to read this.</b> Burdens and benefits are shown side by side at the size you choose. The strength bars show how steeply each item grows with size&mdash;the core insight is that lasting benefits (permanent jobs) grow slowly while burdens (power, water) grow in step with size. No single "score" is shown on purpose.</p>
+    <p><b>How to read this.</b> What a facility uses and what it provides are shown side by side at the size you choose. The bars show how steeply each item changes with size&mdash;items scale differently, with some rising in step with size and others changing little. No single "score" is shown.</p>
     <p><b>Sources &amp; limits.</b> Power and water from facility-efficiency ranges (WUE/PUE, Lawrence Berkeley); Maine electricity use ~11,300 GWh/yr and sales tax 5.5% (EIA, Maine Revenue Services); equipment exemption per Maine's BETE program; build cost from 2025&ndash;26 industry benchmarks. Job and revenue multipliers are placeholders pending an IMPLAN or REMI model calibrated to Maine. Independent research finds data-center incentives have limited measurable effect on local jobs.</p>
     <p><b>Not legal, engineering, or financial advice.</b> For council discussion; verify against primary Maine statutes and a site-specific study before any decision.</p>
   </footer>
@@ -556,7 +556,7 @@
     document.getElementById('g-jobsperm-plain').innerHTML="Creates <b>"+oLo+"\u2013"+oHi+" permanent jobs</b> at the site";
     document.getElementById('g-jobsperm-sub').innerHTML="Maybe <b>"+tLo+"\u2013"+tHi+"</b> total once local spin-off jobs are counted. Data centers run with very few staff.";
     bars(document.getElementById('g-jobsperm-bars'), i===0?1:2); // weak scaling: stays low
-    document.getElementById('g-jobsperm-scl').textContent="barely grows with size";
+    document.getElementById('g-jobsperm-scl').textContent="rises slowly with size";
     document.getElementById('g-jobsperm-dd').innerHTML=
       '<div class="row"><span>On-site jobs</span><span>'+oLo+'\u2013'+oHi+' FTEs</span></div>'+
       '<div class="row"><span>With spin-off</span><span>~'+tLo+'\u2013'+tHi+'</span></div>'+
@@ -568,14 +568,14 @@
     // workers on site at once ~ job-years / ~1.75-year build
     var wkLo=Math.round(cjLo/1.75/10)*10, wkHi=Math.round(cjHi/1.75/10)*10;
     document.getElementById('g-build-plain').innerHTML="Brings <b>"+moneyShort(capLo)+"\u2013"+moneyShort(capHi)+"</b> in construction investment";
-    document.getElementById('g-build-sub').innerHTML="Employs roughly <b>"+fmt(wkLo)+"\u2013"+fmt(wkHi)+" workers</b> at a time during the ~1.5\u20132 year build \u2014 a real boost, but it ends when construction finishes.";
+    document.getElementById('g-build-sub').innerHTML="Employs roughly <b>"+fmt(wkLo)+"\u2013"+fmt(wkHi)+" workers</b> at a time during the ~1.5\u20132 year build, then ends when construction finishes.";
     bars(document.getElementById('g-build-bars'), i+2>5?5:i+2);
     document.getElementById('g-build-scl').textContent="grows with size (one-time)";
     document.getElementById('g-build-dd').innerHTML=
       '<div class="row"><span>Build & infrastructure</span><span>'+moneyShort(capLo)+'\u2013'+moneyShort(capHi)+'</span></div>'+
       '<div class="row"><span>Workers on site at a time</span><span>~'+fmt(wkLo)+'\u2013'+fmt(wkHi)+'</span></div>'+
       '<div class="row"><span>Total construction job-years</span><span>'+fmt(cjLo)+'\u2013'+fmt(cjHi)+'</span></div>'+
-      '<p><b>What\u2019s a "job-year"?</b> One person working full-time for one year. A two-year build employing 800 people is ~1,600 job-years \u2014 so the big job-years number is not 1,600 separate jobs, it\u2019s the same crews working across the build. We lead with workers-at-a-time above because it\u2019s the more honest picture of activity on the ground.</p>'+
+      '<p><b>What\u2019s a "job-year"?</b> One person working full-time for one year. A two-year build employing 800 people is ~1,600 job-years \u2014 so the job-years number is not 1,600 separate jobs, it\u2019s the same crews working across the build. We lead with workers-at-a-time above because it\u2019s a more intuitive measure of on-site activity.</p>'+
       '<p>At $'+CAP[type][0]+'\u2013'+CAP[type][1]+'M per MW ('+(type==='ai'?'AI / high-density':'standard / cloud')+'), excluding imported server cost. These jobs end when the build does.</p>';
 
     // Tax (recurring property tax is the real benefit; exemption guts it)
@@ -586,20 +586,20 @@
     document.getElementById('g-tax-plain').innerHTML="Pays <b>"+moneyShort(ptLo)+"\u2013"+moneyShort(ptHi)+" a year</b> in property tax"+(exempt?' <span class="uchip">reduced by tax break</span>':'');
     document.getElementById('g-tax-sub').innerHTML="Plus a one-time "+moneyShort(sutLo)+"\u2013"+moneyShort(sutHi)+" in sales tax during construction.";
     bars(document.getElementById('g-tax-bars'), exempt?1:(i+2>5?5:i+2));
-    document.getElementById('g-tax-scl').textContent=exempt?"mostly erased by tax break":"grows with size";
+    document.getElementById('g-tax-scl').textContent=exempt?"reduced by tax break":"grows with size";
     document.getElementById('g-tax-dd').innerHTML=
       '<div class="row"><span>Annual property tax</span><span>'+moneyShort(ptLo)+'\u2013'+moneyShort(ptHi)+'/yr</span></div>'+
       '<div class="row"><span>One-time sales tax</span><span>'+moneyShort(sutLo)+'\u2013'+moneyShort(sutHi)+'</span></div>'+
-      '<p>Property tax = assessed value (~70% of capital) \u00D7 mill rate (12\u201320 per $1,000). Sales tax = 5.5% on the taxable ~40% of construction. '+(exempt?'<b>With the equipment exemption, most value is untaxed</b> \u2014 a data center is mostly equipment, so recurring revenue drops sharply.':'No exemption applied here.')+'</p>';
+      '<p>Property tax = assessed value (~70% of capital) \u00D7 mill rate (12\u201320 per $1,000). Sales tax = 5.5% on the taxable ~40% of construction. '+(exempt?'<b>With the equipment exemption, most value is untaxed</b> \u2014 a data center is mostly equipment, so recurring revenue is substantially lower.':'No exemption applied here.')+'</p>';
 
     // incentive flag
     var inc=document.getElementById('incentiveFlag');
     if(exempt){
       inc.style.display='block';
-      inc.innerHTML="<b>The tax break changes the math.</b> Maine's equipment exemption (BETE) leaves most of the facility's value untaxed. The ongoing tax benefit shown above is what remains <em>after</em> the break \u2014 toggle it off in the controls to see the full-tax figure, and weigh the difference as the cost of attracting the project.";
+      inc.innerHTML="<b>A tax break is applied.</b> Maine's equipment exemption (BETE) leaves most of the facility's value untaxed. The ongoing tax figure shown above is what remains <em>after</em> the exemption \u2014 toggle it off in the controls to see the full-tax figure. The difference represents the revenue forgone to attract the project.";
     } else {
       inc.style.display='block';
-      inc.innerHTML="<b>No tax break applied.</b> This shows full taxable revenue. If the community offered Maine's equipment exemption (BETE) to attract the project, most of this ongoing revenue would disappear \u2014 toggle it on to see how much.";
+      inc.innerHTML="<b>No tax break applied.</b> This shows full taxable revenue. If the community offered Maine's equipment exemption (BETE), most of this ongoing revenue would be forgone \u2014 toggle it on to see the difference.";
     }
 
     // ===== PERMIT GATES =====
