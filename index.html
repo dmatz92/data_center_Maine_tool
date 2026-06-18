@@ -77,20 +77,30 @@
   }
   /* size as fulcrum */
   .size-control { }
-  .size-now { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:6px; }
+  .size-now { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:14px; }
   .size-now .tier { font-size:30px; color:var(--ink); }
   .size-now .mw { font-size:15px; color:var(--ink-3); font-weight:600; }
-  .size-track-wrap { margin-top:18px; }
-  input[type=range]{ width:100%; accent-color:var(--slate); height:6px; }
-  .size-stops { display:flex; justify-content:space-between; margin-top:10px; }
-  .size-stops button {
-    flex:1; background:none; border:none; cursor:pointer; padding:6px 2px 0;
-    font-family:inherit; font-size:12px; font-weight:600; color:var(--ink-3);
-    border-top:2px solid var(--line-2); transition:color .15s, border-color .15s;
+  .tier-desc { font-size:13.5px; color:var(--ink-2); margin:6px 0 14px; line-height:1.5; }
+  .size-seg { display:flex; gap:0; border:1.5px solid var(--line); border-radius:8px; overflow:hidden; }
+  .size-seg button {
+    flex:1; background:var(--card); border:none; border-right:1.5px solid var(--line);
+    cursor:pointer; padding:10px 6px 9px; font-family:inherit; font-size:13px; font-weight:600;
+    color:var(--ink-3); line-height:1.25; transition:background .12s, color .12s;
+    text-align:center;
   }
-  .size-stops button .st-mw { display:block; font-size:10.5px; font-weight:600; color:var(--ink-3); margin-top:2px; }
-  .size-stops button.on { color:var(--slate); border-top-color:var(--slate); }
-  .size-stops button.on .st-mw { color:var(--ink-2); }
+  .size-seg button:last-child { border-right:none; }
+  .size-seg button .st-mw { display:block; font-size:10.5px; font-weight:500; color:var(--ink-3); margin-top:3px; transition:color .12s; }
+  .size-seg button:hover:not(.on) { background:var(--paper); }
+  .size-seg button.on { background:var(--slate); color:#fff; }
+  .size-seg button.on .st-mw { color:rgba(255,255,255,.75); }
+  .colo-refine {
+    margin-top:14px; padding:12px 14px; background:var(--paper); border-radius:7px;
+    border:1px solid var(--line);
+  }
+  .colo-refine-label { font-size:12.5px; font-weight:600; color:var(--ink-2); margin-bottom:8px; }
+  .colo-refine-label strong { color:var(--slate); }
+  .colo-refine input[type=range] { width:100%; accent-color:var(--slate); height:4px; display:block; }
+  .colo-refine-ends { display:flex; justify-content:space-between; font-size:11px; color:var(--ink-3); margin-top:4px; }
 
   .deck-row { display:flex; gap:26px; flex-wrap:wrap; margin-top:24px; padding-top:22px; border-top:1px solid var(--line-2); }
   .mini-field { flex:1; min-width:150px; }
@@ -248,17 +258,19 @@
     <div class="deck-label">Start here &mdash; how big a facility?</div>
     <div class="size-control">
       <div class="size-now">
-        <span class="tier num" id="tierName">Mid-size</span>
-        <span class="mw" id="tierMw">10&ndash;20 MW &middot; modeled at ~15 MW</span>
+        <span class="tier num" id="tierName">Colocation</span>
+        <span class="mw" id="tierMw">10&ndash;100 MW &middot; modeled at ~40 MW</span>
       </div>
-      <div class="size-track-wrap">
-        <input type="range" id="size" min="0" max="3" step="1" value="1">
-        <div class="size-stops" id="stops">
-          <button data-i="0">Edge<span class="st-mw">1&ndash;9 MW</span></button>
-          <button data-i="1">Mid-size<span class="st-mw">10&ndash;20 MW</span></button>
-          <button data-i="2">Large<span class="st-mw">21&ndash;100 MW</span></button>
-          <button data-i="3">Hyperscaler<span class="st-mw">100+ MW</span></button>
-        </div>
+      <div class="tier-desc" id="tierDesc"></div>
+      <div class="size-seg" id="stops">
+        <button data-i="0">Edge / Enterprise<span class="st-mw">1&ndash;9 MW</span></button>
+        <button data-i="1">Colocation<span class="st-mw">10&ndash;100 MW</span></button>
+        <button data-i="2">Hyperscaler<span class="st-mw">100+ MW</span></button>
+      </div>
+      <div class="colo-refine" id="coloRefine" style="display:none;">
+        <div class="colo-refine-label">Refine colocation size: <strong id="coloMwLabel">40 MW</strong></div>
+        <input type="range" id="coloMw" min="10" max="100" step="5" value="40">
+        <div class="colo-refine-ends"><span>10 MW</span><span>100 MW</span></div>
       </div>
     </div>
     <div class="deck-row">
@@ -433,7 +445,7 @@
 
   <footer class="foot">
     <p><b>How to read this.</b> What a facility uses and what it provides are shown side by side at the size you choose. The bars show how steeply each item changes with size&mdash;items scale differently, with some rising in step with size and others changing little. No single "score" is shown.</p>
-    <p><b>Sources &amp; limits.</b> Power and water from facility-efficiency ranges (WUE/PUE, Lawrence Berkeley); Maine electricity use ~11,300 GWh/yr and sales tax 5.5% (EIA, Maine Revenue Services); equipment exemption per Maine's BETE program; build cost from 2025&ndash;26 industry benchmarks. Job and revenue multipliers are placeholders pending an IMPLAN or REMI model calibrated to Maine. Employment-effect estimates informed by Brookings Institution (2026), which found 4&ndash;5% county employment growth at hyperscale facilities using synthetic control methods &mdash; and found naive estimates (common in developer-commissioned studies) overstate effects by ~3x. Ratepayer risk is qualitative; actual exposure depends on interconnection agreement terms not modeled here. LBNL (2019&ndash;2025 analysis) found data centers were not a major driver of retail electricity price increases nationally during that period, but concentrated regional buildout (as in Northern Virginia) can produce measurable local effects.</p>
+    <p><b>Sources &amp; limits.</b> Power and water from facility-efficiency ranges (WUE/PUE, Lawrence Berkeley); Maine electricity use ~11,300 GWh/yr and sales tax 5.5% (EIA, Maine Revenue Services); equipment exemption per Maine's BETE program; build cost from 2025&ndash;26 industry benchmarks. Job and revenue multipliers are placeholders pending an IMPLAN or REMI model calibrated to Maine. Employment-effect estimates informed by Brookings Institution (2026), which found 4&ndash;5% county employment growth at hyperscale facilities using synthetic control methods &mdash; and found naive estimates (common in developer-commissioned studies) overstate effects by ~3x. Ratepayer risk is qualitative; the mechanism (infrastructure costs entering the rate base under cost-of-service regulation) applies at every size — what scales with facility size is the magnitude of investment that could be socialized, not whether the mechanism exists. Maine has no statewide large-load cost-allocation rule as of this writing. LBNL (2019&ndash;2025 analysis) found data centers were not a major driver of retail electricity price increases nationally during that period, but that predates the current AI-driven buildout and reflects national averages rather than Maine-specific grid conditions.</p>
     <p><b>Not legal, engineering, or financial advice.</b> For council discussion; verify against primary Maine statutes and a site-specific study before any decision.</p>
   </footer>
 </div>
@@ -441,10 +453,9 @@
 <script>
   // ---------- data ----------
   var TIERS = [
-    { key:"edge",  name:"Edge",        full:"Edge / small enterprise", range:"1\u20139 MW",   mw:5,   tag:"1\u20139 MW" },
-    { key:"mid",   name:"Mid-size",    full:"Mid-size / regional",     range:"10\u201320 MW", mw:15,  tag:"10\u201320 MW" },
-    { key:"large", name:"Large",       full:"Large",                   range:"21\u2013100 MW",mw:60,  tag:"21\u2013100 MW" },
-    { key:"hyper", name:"Hyperscaler", full:"Hyperscaler",             range:"100+ MW",       mw:250, tag:"100+ MW" }
+    { key:"edge",  name:"Edge / Enterprise", full:"Edge / Enterprise", range:"1\u20139 MW",    mw:5,   tag:"1\u20139 MW" },
+    { key:"colo",  name:"Colocation",        full:"Colocation",        range:"10\u2013100 MW", mw:40,  tag:"10\u2013100 MW" },
+    { key:"hyper", name:"Hyperscaler",       full:"Hyperscaler",       range:"100+ MW",        mw:250, tag:"100+ MW" }
   ];
   var WUE={evap:[1.8,1.9],closed:[0.2,0.5],air:[0.0,0.2]};
   var PUE={evap:[1.12,1.30],closed:[1.10,1.25],air:[1.20,1.45]};
@@ -489,20 +500,41 @@
   }
 
   // ---------- main ----------
+  var selectedTier = 1; // default: colocation
   function compute(){
-    var i=+document.getElementById('size').value;
-    var t=TIERS[i], mw=t.mw;
+    var i = selectedTier;
+    var t = TIERS[i];
+    // For colocation, read the sub-slider; otherwise use tier default
+    var mw = (i === 1) ? +document.getElementById('coloMw').value : t.mw;
+
+    // Qualitative level 0-3 for bar scaling and threshold logic
+    // edge=0, colo-low(10-30)=1, colo-high(30-100)=2, hyper=3
+    var qlevel = (i===0) ? 0 : (i===2) ? 3 : (mw < 30 ? 1 : 2);
+
     var cool=document.getElementById('cooling').value;
     var type=document.getElementById('type').value;
     var exempt=document.getElementById('exempt').value==='yes';
     var muni=document.getElementById('muni').value;
 
+    // Show/hide colo sub-slider
+    document.getElementById('coloRefine').style.display = (i===1) ? 'block' : 'none';
+
     // header + stops
-    document.getElementById('tierName').textContent=t.full;
-    document.getElementById('tierMw').innerHTML=t.range+" &middot; modeled at ~"+mw+" MW";
+    var mwLabel = (i===1) ? t.range+' \u00b7 modeled at ~'+mw+' MW' : t.range+' \u00b7 modeled at ~'+mw+' MW';
+    document.getElementById('tierName').textContent = t.full;
+    document.getElementById('tierMw').innerHTML = mwLabel;
+    document.getElementById('coloMwLabel').textContent = mw+' MW';
     Array.prototype.forEach.call(document.querySelectorAll('#stops button'),function(b){
       b.classList.toggle('on', +b.dataset.i===i);
     });
+
+    // tier descriptor
+    var descs = [
+      "A facility serving a specific local area or a large organization\u2019s private on-premises infrastructure \u2014 think hospitals, universities, or manufacturers running their own servers. Developer proposals to a planning board rarely fall in this range; these are typically built by and for the organization that uses them.",
+      "A facility built by a developer and rented out to multiple tenants, who bring their own servers. This is the category Maine is most likely receiving active inquiries about. The 10\u2013100 MW range is wide \u2014 use the slider below to model a specific proposal.",
+      "A single-tenant campus built by and for one of a small number of large technology companies (AWS, Google, Microsoft, Meta). These are the facilities driving most of the national conversation around grid impact and water use. Maine has none yet, and grid constraints may limit near-term feasibility."
+    ];
+    document.getElementById('tierDesc').textContent = descs[i];
 
     // ===== BURDENS =====
     // Power (electricity consumption -> homes + % of Maine)
@@ -512,13 +544,15 @@
     var pctLo=eLo/ME_GWH*100, pctHi=eHi/ME_GWH*100;
     document.getElementById('b-power-plain').innerHTML="Uses as much electricity as <b>"+fmt(homesRound(homesLo))+"\u2013"+fmt(homesRound(homesHi))+" Maine homes</b>";
     document.getElementById('b-power-sub').innerHTML="That's about <b>"+(pctLo<1?pctLo.toFixed(2):pctLo.toFixed(1))+"\u2013"+(pctHi<1?pctHi.toFixed(2):pctHi.toFixed(1))+"%</b> of all the electricity Maine uses in a year.";
-    bars(document.getElementById('b-power-bars'), i+2>5?5:i+2);
+    bars(document.getElementById('b-power-bars'), qlevel+2>5?5:qlevel+2);
     document.getElementById('b-power-scl').textContent="grows with size";
     document.getElementById('b-power-dd').innerHTML=
-      '<div class="row"><span>Facility power draw</span><span>'+fLo.toFixed(0)+'\u2013'+fHi.toFixed(0)+' MW</span></div>'+
+      '<div class="row"><span>IT load (servers &amp; networking)</span><span>'+mw+' MW</span></div>'+
+      '<div class="row"><span>Cooling &amp; other overhead</span><span>'+(fLo-mw).toFixed(0)+'\u2013'+(fHi-mw).toFixed(0)+' MW</span></div>'+
+      '<div class="row"><span>Total facility draw from the grid</span><span>'+fLo.toFixed(0)+'\u2013'+fHi.toFixed(0)+' MW</span></div>'+
       '<div class="row"><span>Electricity per year</span><span>'+fmt(eLo)+'\u2013'+fmt(eHi)+' GWh</span></div>'+
       '<div class="row"><span>Share of Maine\u2019s use</span><span>'+(pctLo<1?pctLo.toFixed(2):pctLo.toFixed(1))+'\u2013'+(pctHi<1?pctHi.toFixed(2):pctHi.toFixed(1))+'%</span></div>'+
-      '<p>IT load \u00D7 PUE ('+PUE[cool][0]+'\u2013'+PUE[cool][1]+', '+COOLNAME[cool]+') \u00D7 8,760 hours. Maine uses ~11,300 GWh/year (EIA, 2023).</p>';
+      '<p>The overhead multiplier (PUE '+PUE[cool][0]+'\u2013'+PUE[cool][1]+' for '+COOLNAME[cool]+' cooling) means a '+mw+' MW IT load draws '+fLo.toFixed(0)+'\u2013'+fHi.toFixed(0)+' MW total from the grid. PUE 1.0 would mean zero overhead; real facilities range from ~1.1 (highly efficient) to 1.5+. Maine uses ~11,300 GWh/year (EIA, 2023).</p>';
 
     // Water
     var itKwh=mw*8760*1000;
@@ -535,7 +569,7 @@
       pe.innerHTML="Uses about as much water as <b>"+fmt(homesRound(hwLo))+"\u2013"+fmt(homesRound(hwHi))+" households</b>";
       var poolsHi=wdHi/GAL_POOL;
       ps.innerHTML="Roughly <b>"+(poolsHi<1?"under 1":(poolsHi>=10?fmt(poolsHi):poolsHi.toFixed(1)))+"</b> swimming pool"+(poolsHi>=2?"s":"")+" of water a day.";
-      bars(document.getElementById('b-water-bars'), cool==='evap'?(i+2>5?5:i+2):(i+1>5?5:i+1));
+      bars(document.getElementById('b-water-bars'), cool==='evap'?(qlevel+2>5?5:qlevel+2):(qlevel+1>5?5:qlevel+1));
       document.getElementById('b-water-scl').textContent="grows with size";
     }
     document.getElementById('b-water-dd').innerHTML=
@@ -563,26 +597,42 @@
     document.getElementById('b-grid-scl').textContent="grows with size";
     document.getElementById('b-grid-dd').innerHTML='<p>Connection cost and feasibility depend on the specific substation and line capacity \u2014 only a utility/ISO-NE interconnection study can resolve them. Historically most large interconnection requests are withdrawn before connecting (Lawrence Berkeley).</p>';
 
-    // Ratepayer impact (qualitative, depends on deal structure)
+    // Ratepayer impact (qualitative — mechanism exists at every size; magnitude scales)
     var rp=document.getElementById('b-rate-plain'), rs=document.getElementById('b-rate-sub');
     var rateBars, rateScl, rateDD;
+    var rateShared='<p><b>How the default works.</b> Under Maine\u2019s traditional cost-of-service utility regulation, infrastructure investments \u2014 substations, distribution upgrades, new lines \u2014 go into the utility\u2019s rate base and are recovered from all ratepayers over time. This is the baseline. A \u201Cpay your way\u201D structure, where the developer directly funds upgrades, is the exception \u2014 it has to be specifically negotiated or mandated by policy. Maine does not currently have a statewide rule requiring large loads to bear their own interconnection costs, which is one reason ratepayer protection is on this Council\u2019s agenda.</p>';
     if(mw>=100){
-      rp.innerHTML="<b>Significant ratepayer risk</b> — depends on the deal";
-      rs.textContent="At this size, grid infrastructure costs can run into the hundreds of millions. How those costs are allocated \u2014 developer vs. ratepayers \u2014 is the key question.";
-      rateBars=4; rateScl="high if costs socialized";
-      rateDD='<p>A hyperscale facility will almost certainly require new substation, transmission, or generation capacity. Under a "pay your way" structure the developer funds these upgrades directly. Under a traditional utility model, those costs are spread across all ratepayers \u2014 including households and small businesses. Maine residential rates rose ~5% nationally in 2024; a large facility that socializes infrastructure costs could accelerate that trend locally. The interconnection agreement terms, not the facility itself, determine which way this goes. No public deal in Maine has yet set a precedent at this scale.</p>'+
-        '<p>ISO-NE interconnection rules require studies and cost allocations, but the specific terms are negotiated. Ask: who pays for substation upgrades? Who pays for new transmission lines? Is there a "ratepayer protection" clause? Brookings found that in colocation counties (not hyperscale), incentive costs represent 62% of total construction investment \u2014 meaning public subsidy costs can rival the facility\u2019s own capital.</p>';
-    } else if(mw>=20){
-      rp.innerHTML="<b>Moderate ratepayer exposure</b> — deal terms matter";
-      rs.textContent="Mid-size and large facilities require meaningful grid work. Whether that cost is borne by the developer or shared broadly depends on the interconnection agreement.";
-      rateBars=3; rateScl="depends on deal structure";
-      rateDD='<p>Facilities in the 20\u2013100 MW range typically require substation upgrades and possibly new distribution infrastructure. Under a "pay your way" approach (increasingly common for larger loads), the developer funds upgrades directly and ratepayer exposure is limited. Under traditional cost-of-service utility regulation, some portion may be socialized. Maine has not established a clear statewide rule; terms vary by utility and negotiation. The Council\u2019s ratepayer protection mandate makes this a central question.</p>'+
-        '<p>The LBNL analysis covering 2019\u20132025 found data centers were not yet a major driver of retail electricity price increases nationally \u2014 but that reflects a period before the current AI-driven buildout accelerated. Regional concentration (Virginia is the cautionary example) is where rate impacts become measurable.</p>';
+      // Hyperscaler: 100+ MW / modeled at 250 MW
+      rp.innerHTML="<b>Ratepayer cost risk is high</b> without explicit protection";
+      rs.textContent="A hyperscale facility will almost certainly trigger major transmission-level infrastructure investment. Under the current regulatory default, a significant share of those costs would be socialized across all CMP or Versant customers.";
+      rateBars=5; rateScl="high without policy protection";
+      rateDD=rateShared+
+        '<p>At 100+ MW, the required infrastructure moves beyond substations into <b>high-voltage transmission upgrades and potentially new generation capacity</b>. The dollar magnitude \u2014 potentially hundreds of millions \u2014 is large enough to produce measurable rate impacts for Maine households and businesses statewide. Northern Virginia is the cautionary example: concentrated hyperscale buildout contributed to sustained upward rate pressure for residential customers across a wide service territory.</p>'+
+        '<p>ISO-NE interconnection rules require cost studies, but the allocation of those costs between developer and ratepayers is a policy and negotiating question, not an automatic outcome. Key questions for any proposed deal: who funds transmission upgrades? Is there an explicit ratepayer protection clause? No Maine deal at this scale has set a public precedent yet.</p>';
+    } else if(mw>=30){
+      // Colo high (30–100 MW): substation-level
+      rp.innerHTML="<b>Ratepayer cost risk is substantial</b> at this size";
+      rs.textContent="Large facilities typically trigger substation-level investment. Under the current regulatory default, those costs can flow to all ratepayers \u2014 not just the new customer \u2014 unless the deal explicitly requires otherwise.";
+      rateBars=4; rateScl="substantial — substation-level investment";
+      rateDD=rateShared+
+        '<p>At this scale, the most common trigger is a <b>substation upgrade or new substation</b> \u2014 a qualitatively different and more expensive investment than distribution-feeder work. Substation projects can run $10\u2013$50M or more, and under cost-of-service regulation those costs enter the rate base and are spread across the utility\u2019s full customer base. A 60 MW facility in a rural part of CMP or Versant\u2019s territory could be one of the largest single loads on a local substation, making the cost-allocation question concrete and immediate.</p>'+
+        '<p>Maine has no statewide rule requiring facilities in this size range to directly fund their own interconnection infrastructure. Outcomes are determined by individual negotiation between the utility and the developer, with limited public visibility. Establishing a clear cost-allocation standard for this tier is one of the more actionable things this Council could recommend.</p>';
+    } else if(mw>=10){
+      // Colo low (10–30 MW): distribution-level
+      rp.innerHTML="<b>Ratepayer cost risk is real</b>, though more localized";
+      rs.textContent="Mid-size facilities often require distribution upgrades that, under traditional regulation, can flow to the local customer base. The scale is smaller, but the mechanism is the same.";
+      rateBars=3; rateScl="real — distribution-level investment";
+      rateDD=rateShared+
+        '<p>A 10\u201320 MW facility typically connects at the <b>distribution level</b> \u2014 requiring feeder upgrades, transformer replacements, or new switching equipment rather than a full substation. These costs are smaller in absolute terms than for a large or hyperscale facility, but they fall on a narrower base: the customers served by that local distribution circuit, or the utility\u2019s full customer base if costs are rolled into general rate cases. In a smaller Maine town, the concentration effect can still be meaningful.</p>'+
+        '<p>Maine has no statewide cost-allocation rule for this size range. Whether the developer funds upgrades directly or those costs enter the rate base depends on the utility\u2019s standard tariff terms and any site-specific negotiation \u2014 neither of which typically involves public scrutiny at the local approval stage.</p>';
     } else {
-      rp.innerHTML="<b>Limited ratepayer risk</b> at this size";
-      rs.textContent="Smaller facilities typically connect to existing distribution infrastructure with modest upgrade costs.";
-      rateBars=1; rateScl="low at this scale";
-      rateDD='<p>Edge and small enterprise facilities (\u22641\u20139 MW) typically connect to existing distribution feeders with limited infrastructure investment required. Ratepayer exposure is minimal unless the local grid is already constrained. The utility\u2019s standard interconnection process applies; no special rate treatment or large-load tariff is usually triggered at this size.</p>';
+      // Edge: 1–9 MW / modeled at 5 MW
+      rp.innerHTML="<b>Ratepayer cost risk is lower</b> at this size";
+      rs.textContent="Edge facilities often connect to existing infrastructure with limited upgrades needed. The mechanism still applies if the local grid is constrained \u2014 the interconnection study is what reveals whether it does.";
+      rateBars=2; rateScl="lower magnitude, same mechanism";
+      rateDD=rateShared+
+        '<p>A 1\u20139 MW facility frequently connects to an existing distribution feeder without triggering major new infrastructure. Where the local grid has spare capacity, ratepayer exposure is minimal. But in a rural Maine town with an already-constrained feeder, even a modest new load can trigger upgrades that go into the rate base \u2014 at a scale that is small in absolute terms but potentially significant for a small utility service territory.</p>'+
+        '<p>The utility\u2019s standard interconnection study will determine whether upgrades are needed and at what cost. That study should be completed and made publicly available before any local approval, not treated as an internal utility matter. It is the key document for understanding whether this facility\u2019s arrival has ratepayer consequences for the community.</p>';
     }
     bars(document.getElementById('b-rate-bars'), rateBars);
     document.getElementById('b-rate-scl').textContent=rateScl;
@@ -594,7 +644,7 @@
     var tLo=Math.round(oLo*2.0), tHi=Math.round(oHi*3.0);
     document.getElementById('g-jobsperm-plain').innerHTML="Creates <b>"+oLo+"\u2013"+oHi+" permanent jobs</b> at the site";
     document.getElementById('g-jobsperm-sub').innerHTML="Maybe <b>"+tLo+"\u2013"+tHi+"</b> total once local spin-off jobs are counted. Data centers run with very few staff.";
-    bars(document.getElementById('g-jobsperm-bars'), i===0?1:2); // weak scaling: stays low
+    bars(document.getElementById('g-jobsperm-bars'), qlevel===0?1:2); // weak scaling: stays low
     document.getElementById('g-jobsperm-scl').textContent="rises slowly with size";
     document.getElementById('g-jobsperm-dd').innerHTML=
       '<div class="row"><span>On-site jobs</span><span>'+oLo+'\u2013'+oHi+' FTEs</span></div>'+
@@ -610,7 +660,7 @@
     var wkLo=Math.round(cjLo/1.75/10)*10, wkHi=Math.round(cjHi/1.75/10)*10;
     document.getElementById('g-build-plain').innerHTML="Brings <b>"+moneyShort(capLo)+"\u2013"+moneyShort(capHi)+"</b> in construction investment";
     document.getElementById('g-build-sub').innerHTML="Employs roughly <b>"+fmt(wkLo)+"\u2013"+fmt(wkHi)+" workers</b> at a time during the ~1.5\u20132 year build, then ends when construction finishes.";
-    bars(document.getElementById('g-build-bars'), i+2>5?5:i+2);
+    bars(document.getElementById('g-build-bars'), qlevel+2>5?5:qlevel+2);
     document.getElementById('g-build-scl').textContent="grows with size (one-time)";
     document.getElementById('g-build-dd').innerHTML=
       '<div class="row"><span>Build & infrastructure</span><span>'+moneyShort(capLo)+'\u2013'+moneyShort(capHi)+'</span></div>'+
@@ -626,7 +676,7 @@
     var sutLo=capLo*taxShare*SUT, sutHi=capHi*taxShare*SUT;
     document.getElementById('g-tax-plain').innerHTML="Pays <b>"+moneyShort(ptLo)+"\u2013"+moneyShort(ptHi)+" a year</b> in property tax"+(exempt?' <span class="uchip">reduced by tax break</span>':'');
     document.getElementById('g-tax-sub').innerHTML="Plus a one-time "+moneyShort(sutLo)+"\u2013"+moneyShort(sutHi)+" in sales tax during construction.";
-    bars(document.getElementById('g-tax-bars'), exempt?1:(i+2>5?5:i+2));
+    bars(document.getElementById('g-tax-bars'), exempt?1:(qlevel+2>5?5:qlevel+2));
     document.getElementById('g-tax-scl').textContent=exempt?"reduced by tax break":"grows with size";
     document.getElementById('g-tax-dd').innerHTML=
       '<div class="row"><span>Annual property tax</span><span>'+moneyShort(ptLo)+'\u2013'+moneyShort(ptHi)+'/yr</span></div>'+
@@ -702,11 +752,12 @@
     document.getElementById('gates').innerHTML=gh;
   }
 
-  // stops clickable
+  // segment buttons
   Array.prototype.forEach.call(document.querySelectorAll('#stops button'),function(b){
-    b.addEventListener('click',function(){ document.getElementById('size').value=b.dataset.i; compute(); });
+    b.addEventListener('click',function(){ selectedTier = +b.dataset.i; compute(); });
   });
-  ['size','cooling','muni','type','exempt'].forEach(function(id){
+  document.getElementById('coloMw').addEventListener('input', compute);
+  ['cooling','muni','type','exempt'].forEach(function(id){
     document.getElementById(id).addEventListener('input',compute);
   });
   compute();
